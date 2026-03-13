@@ -15,6 +15,7 @@ function App() {
   const [blackElo, setBlackElo] = useState('2600');
   const [isBotThinking, setIsBotThinking] = useState(false);
   const [gameMode, setGameMode] = useState<'player_vs_ai' | 'player_vs_player' | 'ai_vs_ai'>('player_vs_ai');
+  const [pendingGameMode, setPendingGameMode] = useState<'player_vs_ai' | 'player_vs_player' | 'ai_vs_ai' | null>(null);
 
   function onDrop(sourceSquare: string, targetSquare: string, piece: string) {
     try {
@@ -218,8 +219,11 @@ function App() {
               className="form-select" 
               value={gameMode} 
               onChange={(e) => {
-                setGameMode(e.target.value as 'player_vs_ai' | 'player_vs_player' | 'ai_vs_ai');
-                if (gameMode !== e.target.value) resetGame();
+                const newMode = e.target.value as 'player_vs_ai' | 'player_vs_player' | 'ai_vs_ai';
+                if (gameMode !== newMode) {
+                  // Trigger custom confirmation dialog instead of window.confirm
+                  setPendingGameMode(newMode);
+                }
               }}
             >
               <option value="player_vs_ai">1. Player vs AI</option>
@@ -259,8 +263,47 @@ function App() {
             ) : renderHistory()}
           </div>
         </div>
-
       </section>
+
+      {/* Custom Confirmation Dialog Overlay */}
+      {pendingGameMode && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)' }}>
+          <div className="bg-[#1a1f2e] border border-slate-700 rounded-xl p-6 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200" style={{ transform: 'translateY(-2rem)' }}>
+            <h3 className="text-xl font-bold text-white mb-2 text-center">Change Game Mode</h3>
+            <p className="text-slate-300 mb-6 text-sm">
+              You are switching modes. Would you like to reset the board and start fresh, or continue from the current position?
+            </p>
+            <div className="flex flex-col gap-3">
+              <button 
+                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 rounded-lg transition-colors focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                onClick={() => {
+                  setGameMode(pendingGameMode);
+                  resetGame();
+                  setPendingGameMode(null);
+                }}
+              >
+                Reset Board
+              </button>
+              <button 
+                className="w-full bg-slate-700 hover:bg-slate-600 text-white font-medium py-2.5 rounded-lg transition-colors focus:ring-2 focus:ring-slate-500 focus:outline-none"
+                onClick={() => {
+                  setGameMode(pendingGameMode);
+                  setPendingGameMode(null);
+                }}
+              >
+                Continue Playing
+              </button>
+              <button 
+                className="w-full text-slate-400 hover:text-white text-sm font-medium py-2 transition-colors mt-2"
+                onClick={() => setPendingGameMode(null)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
