@@ -60,9 +60,9 @@ function App() {
         requestBotMove('v1');
       }, 2000);
     } else if (gameMode === 'ai_vs_ai') {
-      // AI plays both sides with 5 second delay (ViT is White, V1 is Black)
+      // AI plays both sides with 5 second delay (ViT-Single vs ViT-Hybrid)
       timeoutId = setTimeout(() => {
-        requestBotMove(game.turn() === 'w' ? 'vit' : 'v1');
+        requestBotMove(game.turn() === 'w' ? 'vit_single' : 'vit_hybrid');
       }, 5000);
     }
 
@@ -72,7 +72,7 @@ function App() {
   }, [fen, gameMode, isBotThinking, game]);
 
   // Handle Engine Request calling the PyTorch API
-  async function requestBotMove(modelVersion: 'v1' | 'vit' = 'v1') {
+  async function requestBotMove(modelVersion: 'v1' | 'vit_hybrid' | 'vit_single' = 'v1') {
     if (game.isGameOver()) return;
     
     setIsBotThinking(true);
@@ -141,7 +141,7 @@ function App() {
             <div className="player-avatar">
               {gameMode === 'player_vs_player' ? <User size={18} /> : <Cpu size={18} />}
             </div>
-            {gameMode === 'player_vs_player' ? 'Player 2 (Black)' : gameMode === 'ai_vs_ai' ? `AiChessEngine-V1 (${blackElo})` : `AiChessEngine (${blackElo})`}
+            {gameMode === 'player_vs_player' ? 'Player 2 (Black)' : gameMode === 'ai_vs_ai' ? `AiChessEngine-ViT-Hybrid (${blackElo})` : `AiChessEngine (${blackElo})`}
           </div>
           {isBotThinking && game.turn() === 'b' && <span style={{ color: 'var(--accent-color)' }}>Thinking...</span>}
         </div>
@@ -170,7 +170,7 @@ function App() {
             <div className="player-avatar">
               {gameMode === 'ai_vs_ai' ? <Cpu size={18} /> : <User size={18} />}
             </div>
-            {gameMode === 'ai_vs_ai' ? `AiChessEngine-ViT (${whiteElo})` : `You (${whiteElo})`}
+            {gameMode === 'ai_vs_ai' ? `AiChessEngine-ViT-Single (${whiteElo})` : `You (${whiteElo})`}
           </div>
           {isBotThinking && game.turn() === 'w' && <span style={{ color: 'var(--accent-color)' }}>Thinking...</span>}
         </div>

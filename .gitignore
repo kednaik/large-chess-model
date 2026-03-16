@@ -1,0 +1,8 @@
+ChessData/
+.venv/
+checkpoints/
+.ipynb_checkpoints/
+__pycache__/
+token.json
+client_secret_*
+model/
