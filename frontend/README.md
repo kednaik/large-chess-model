@@ -66,6 +66,31 @@ LargeChessModel/
 
 ---
 
+---
+
+## Architecture Overview
+
+The system follows a modern client-server architecture:
+
+### 1. Frontend (React + Vite)
+- **State Management**: Uses React hooks for board state and move history.
+- **Chess Logic**: Uses `chess.js` for move validation and FEN handling.
+- **UI Components**: `react-chessboard` for the visual board interface.
+- **API Interaction**: Communicates with the backend via fetch requests to the `/api/move` endpoint.
+
+### 2. Backend (FastAPI + Uvicorn)
+- **High Performance**: Asynchronous Python API serving multiple AI models.
+- **CORS Enabled**: Configured to work seamlessly with the React dev server.
+- **End-to-End Logic**: Receives FEN, processes through the selected model, and returns UCI/SAN moves.
+
+### 3. AI Models (PyTorch)
+- **V1 Baseline**: Standard Transformer-based model for move prediction.
+- **ViT-Hybrid**: A Vision Transformer with dual heads (Policy + Value) for advanced evaluation and move selection.
+- **ViT-Single**: A lightweight Vision Transformer focused purely on policy prediction.
+- **Device Support**: Automatically utilizes CUDA, MPS (Apple Silicon), or CPU for inference.
+
+---
+
 ## Deployment / Push
 
 To push changes to the repository:
