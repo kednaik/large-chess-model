@@ -43,10 +43,28 @@ The frontend will be available at `http://localhost:5173`.
 
 ## Project Structure
 
-- `src/App.tsx`: Main application component and game logic.
-- `src/main.tsx`: Application entry point.
-- `src/index.css`: Global styles.
-- `model/api.py`: FastAPI backend serving the chess models.
+```text
+LargeChessModel/
+├── frontend/                # React Frontend
+│   ├── src/
+│   │   ├── assets/          # Static assets (images, icons)
+│   │   ├── App.tsx          # Main game component & logic
+│   │   ├── AppError.tsx     # Error fallback component
+│   │   ├── index.css        # Global styles
+│   │   └── main.tsx         # App entry point
+│   ├── public/              # Public assets
+│   ├── index.html           # HTML template
+│   ├── vite.config.ts       # Vite configuration
+│   └── package.json         # Frontend dependencies
+├── model/                   # Backend & AI Models
+│   ├── api.py               # FastAPI server
+│   ├── requirements.txt     # Python dependencies
+│   └── notebooks/           # Research & Training notebooks (.ipynb)
+├── checkpoints/             # Trained model weights (.pt files)
+└── .gitignore               # Root git ignore file
+```
+
+---
 
 ## Deployment / Push
 
