@@ -11,8 +11,8 @@ function App() {
   const [history, setHistory] = useState<Move[]>([]);
   
   // Settings State
-  const [whiteElo, setWhiteElo] = useState('2600');
-  const [blackElo, setBlackElo] = useState('2600');
+  const [whiteElo] = useState('2600');
+  const [blackElo] = useState('2600');
   const [isBotThinking, setIsBotThinking] = useState(false);
   const [gameMode, setGameMode] = useState<'player_vs_ai' | 'player_vs_player' | 'ai_vs_ai'>('player_vs_ai');
   const [pendingGameMode, setPendingGameMode] = useState<'player_vs_ai' | 'player_vs_player' | 'ai_vs_ai' | null>(null);
@@ -52,17 +52,17 @@ function App() {
   useEffect(() => {
     if (game.isGameOver() || isBotThinking) return;
 
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     if (gameMode === 'player_vs_ai' && game.turn() === 'b') {
       // AI plays Black with 2 second delay
       timeoutId = setTimeout(() => {
-        requestBotMove('v1');
+        requestBotMove('vit_hybrid');
       }, 2000);
     } else if (gameMode === 'ai_vs_ai') {
-      // AI plays both sides with 5 second delay (ViT-Single vs ViT-Hybrid)
+      // AI plays both sides with 5 second delay
       timeoutId = setTimeout(() => {
-        requestBotMove(game.turn() === 'w' ? 'vit_single' : 'vit_hybrid');
+        requestBotMove('vit_hybrid');
       }, 5000);
     }
 
@@ -72,13 +72,14 @@ function App() {
   }, [fen, gameMode, isBotThinking, game]);
 
   // Handle Engine Request calling the PyTorch API
-  async function requestBotMove(modelVersion: 'v1' | 'vit_hybrid' | 'vit_single' = 'v1') {
+  async function requestBotMove(modelVersion: 'vit_hybrid' = 'vit_hybrid') {
     if (game.isGameOver()) return;
     
     setIsBotThinking(true);
     
     try {
-      const response = await fetch('http://localhost:8000/api/move', {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${apiUrl}/api/move`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -170,7 +171,7 @@ function App() {
             <div className="player-avatar">
               {gameMode === 'ai_vs_ai' ? <Cpu size={18} /> : <User size={18} />}
             </div>
-            {gameMode === 'ai_vs_ai' ? `AiChessEngine-ViT-Single (${whiteElo})` : `You (${whiteElo})`}
+            {gameMode === 'ai_vs_ai' ? `AiChessEngine-ViT-Hybrid` : `You`}
           </div>
           {isBotThinking && game.turn() === 'w' && <span style={{ color: 'var(--accent-color)' }}>Thinking...</span>}
         </div>
@@ -183,35 +184,7 @@ function App() {
         </div>
         
         <div className="panel-content">
-          <div className="form-group">
-            <label className="form-label">Target ELO (White)</label>
-            <select 
-              className="form-select" 
-              value={whiteElo} 
-              onChange={(e) => setWhiteElo(e.target.value)}
-            >
-              <option value="1200">[ELO_1] 1200 - Beginner</option>
-              <option value="1600">[ELO_3] 1600 - Intermediate</option>
-              <option value="2000">[ELO_5] 2000 - Expert</option>
-              <option value="2600">[ELO_8] 2600 - Grandmaster</option>
-              <option value="2800">[ELO_9] 2800+ Super GM</option>
-            </select>
-          </div>
-          
-          <div className="form-group">
-            <label className="form-label">Target ELO (Black)</label>
-            <select 
-              className="form-select" 
-              value={blackElo} 
-              onChange={(e) => setBlackElo(e.target.value)}
-            >
-              <option value="1200">[ELO_1] 1200 - Beginner</option>
-              <option value="1600">[ELO_3] 1600 - Intermediate</option>
-              <option value="2000">[ELO_5] 2000 - Expert</option>
-              <option value="2600">[ELO_8] 2600 - Grandmaster</option>
-              <option value="2800">[ELO_9] 2800+ Super GM</option>
-            </select>
-          </div>
+
 
           <div className="form-group">
             <label className="form-label">Game Mode</label>
