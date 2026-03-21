@@ -5,6 +5,11 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import os
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 
 
@@ -165,18 +170,24 @@ class MoveRequest(BaseModel):
 
 @app.post("/api/move")
 def predict_move(request: MoveRequest):
+    logger.info(f"Received move request: FEN={request.fen}, WhiteElo={request.whiteElo}, BlackElo={request.blackElo}")
     try:
         board = chess.Board(request.fen)
     except Exception as e:
+        logger.error(f"Invalid FEN provided: {request.fen}. Error: {e}")
         raise HTTPException(status_code=400, detail=f"Invalid FEN: {str(e)}")
         
     if board.is_game_over():
+        logger.warning(f"Request for move on completed game: {request.fen}")
         raise HTTPException(status_code=400, detail="Game is already over")
         
     best_move = get_best_move_vit(model_vit_hybrid, board, device, request.whiteElo, request.blackElo)
     
     if best_move is None:
+        logger.error(f"Model failed to generate a move for FEN: {request.fen}")
         raise HTTPException(status_code=500, detail="Model could not generate a move")
+        
+    logger.info(f"Generated move: {board.san(best_move)} ({best_move.uci()})")
         
     return {
         "move_san": board.san(best_move),
